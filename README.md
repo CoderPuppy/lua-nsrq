@@ -1,0 +1,2 @@
+# NSRQ
+##### Node-style Require
