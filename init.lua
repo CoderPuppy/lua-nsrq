@@ -16,8 +16,16 @@ local grequire = {
 	extensions = {};
 }
 function grequire.extensions.lua(path, module)
-	local fn, err = loadfile(path, 'bt', module.env)
+	local fn, err
+	if _VERSION == 'Lua 5.1' then
+		fn, err = loadfile(path)
+	else
+		fn, err = loadfile(path, 'bt', module.env)
+	end
 	if not fn then return nil, err end
+	if _VERSION == 'Lua 5.1' then
+		setfenv(fn, module.env)
+	end
 	return fn()
 end
 function grequire.load.string(path, str)
@@ -50,12 +58,8 @@ function grequire.require(require, path)
 	else
 		local loader = grequire.extensions[ext(path)]
 		module = grequire.genmodule(pl.path.dirname(path))
-		local res, err = loader(path, module)
-		if res then
-			module.exports = res
-		else
-			error(err)
-		end
+		module.exports, err = loader(path, module)
+		if module.exports == nil and err then error(err) end
 	end
 	return module
 end
@@ -75,6 +79,9 @@ function grequire.genmodule(base)
 			return _G.require(path)
 		end
 	end})
+	function module.resolve(path)
+		return grequire.resolve(module.base, path)
+	end
 	module.env = setmetatable({
 		module = module;
 		require = module;
