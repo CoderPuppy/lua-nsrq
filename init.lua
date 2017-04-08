@@ -1,4 +1,3 @@
-local posix = require 'posix'
 local pl = {
 	path = require 'pl.path';
 }
