@@ -57,6 +57,7 @@ function grequire.require(require, path)
 	else
 		local loader = grequire.extensions[ext(path)]
 		module = grequire.genmodule(pl.path.dirname(path))
+		grequire.cache[path] = module
 		module.exports, err = loader(path, module)
 		if module.exports == nil and err then error(err) end
 	end
